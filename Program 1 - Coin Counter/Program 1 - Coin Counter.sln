@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{535C04D7-A2A5-47C7-83E0-B340A995CD1F}") = "Program 1 - Coin Counter", "Program 1 - Coin Counter\Program 1 - Coin Counter.cblproj", "{10C13800-62D9-45AA-9BD4-3511266CA1D1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10C13800-62D9-45AA-9BD4-3511266CA1D1}.Debug|x86.ActiveCfg = Debug|x86
+		{10C13800-62D9-45AA-9BD4-3511266CA1D1}.Debug|x86.Build.0 = Debug|x86
+		{10C13800-62D9-45AA-9BD4-3511266CA1D1}.Release|x86.ActiveCfg = Release|x86
+		{10C13800-62D9-45AA-9BD4-3511266CA1D1}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {72B2D026-5925-408D-9B5B-DA8B26DC13CA}
+	EndGlobalSection
+EndGlobal

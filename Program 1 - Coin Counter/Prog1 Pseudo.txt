@@ -1,0 +1,4 @@
+Objective:	Read input file split into denominations of coins 
+						by column num (3 cols per denomination)
+						
+4:03 - Does this work? -Josh

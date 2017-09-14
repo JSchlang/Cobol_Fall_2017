@@ -1,0 +1,3 @@
+                              Coin Counter Report
+
+                    PENNIES:       NICKELS:       DIMES:         QUARTERS:

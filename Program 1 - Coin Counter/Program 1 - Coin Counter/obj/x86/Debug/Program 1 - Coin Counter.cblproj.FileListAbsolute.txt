@@ -1,0 +1,2 @@
+C:\Users\jjc15\OneDrive\School\FALL 2017\COBOL\Program 1 - Coin Counter\Program 1 - Coin Counter\Program 1 - Coin Counter\bin\x86\Debug\Program_1___Coin_Counter.exe
+C:\Users\jjc15\OneDrive\School\FALL 2017\COBOL\Program 1 - Coin Counter\Program 1 - Coin Counter\Program 1 - Coin Counter\obj\x86\Debug\Program_1___Coin_Counter.exe
