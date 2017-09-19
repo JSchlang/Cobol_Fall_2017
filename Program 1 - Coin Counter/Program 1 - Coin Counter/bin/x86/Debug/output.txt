@@ -1,3 +1,16 @@
                               Coin Counter Report
 
+ERROR: The given input record contains invalid data.
+
                     PENNIES:       NICKELS:       DIMES:         QUARTERS:
+INITIAL AMOUNT:     123            456            789            012
+NUMBER OF ROLLS:    002            011            015            000
+REMAINING AMOUNT:   023            016            039            012
+
+                    PENNIES:       NICKELS:       DIMES:         QUARTERS:
+INITIAL AMOUNT:     987            654            321            098
+NUMBER OF ROLLS:    019            016            006            002
+REMAINING AMOUNT:   037            014            021            018
+
+ERROR: The given input record contains invalid data.
+
