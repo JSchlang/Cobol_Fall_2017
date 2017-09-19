@@ -19,6 +19,7 @@
        FD  COIN-FILE
            RECORD CONTAINS 12 CHARACTERS
            DATA RECORD IS COIN-IN.
+      * Record to hold the data read from the input file
        01  COIN-IN.
            05  PENNIES         PIC 9(3).
            05  NICKELS         PIC 9(3).
@@ -28,15 +29,17 @@
        FD  COUNTER-FILE
            RECORD CONTAINS 80 CHARACTERS
            DATA RECORD IS PRINT-LINE.
+      * Record to hold data being written to the output file
        01  PRINT-LINE          PIC X(80).
        
        working-storage section.
+      * Output file title header
        01  TITLE-HEADER.
            05  FILLER          PIC X(30)   VALUE SPACES.
            05  R-HEADER        PIC X(19)   VALUE 'Coin Counter Report'.
            05  FILLER          PIC X(31)   VALUE SPACES.
 
-      *header for columns of output file
+      *header for denomination columns of output file
        01  DENOM-HEADER.
            05  FILLER          PIC X(20)   VALUE SPACES.
            05  P-HEADER        PIC X(8)    VALUE 'PENNIES:'.
@@ -47,7 +50,6 @@
            05  FILLER          PIC X(9)    VALUE SPACES.
            05  Q-HEADER        PIC X(9)    VALUE 'QUARTERS:'.
            05  FILLER          PIC X(6)    VALUE SPACES.
-
 
       *beginnings of individual rows of the output files
        01  INIT-LINE-HDR
@@ -62,13 +64,13 @@
            05  REM             PIC X(17)   VALUE 'REMAINING AMOUNT:'.
            05  FILLER          PIC X(3)    VALUE SPACES.
 
+      * Line to indicate bad input for thw output file
        01  BAD-RECORD-LINE
            05  BAD-REC         PIC X(52)   VALUE
                'ERROR: The given input record contains invalid data.'.
            05  FILLER          PIC X(28)   VALUE SPACES.
 
-
-      * Units for the output lines
+      * Units for # of rolls and # of remaining coins for output lines
        01  ROLL-AMOUNTS
            05  P-ROLL          PIC 999     VALUE ZEROES.
            05  FILLER          PIC X(12)   VALUE SPACES.
@@ -78,6 +80,7 @@
            05  FILLER          PIC X(12)   VALUE SPACES.
            05  Q-ROLL          PIC 999     VALUE ZEROES.
            05  FILLER          PIC X(12)   VALUE SPACES.
+
        01  REM-AMOUNTS
            05  P-REM           PIC 999     VALUE ZEROES.
            05  FILLER          PIC X(12)   VALUE SPACES.
@@ -90,32 +93,39 @@
 
       * Offset used for spacing the numbers in the output file
        01  AMT-OFFSET          PIC X(12)   VALUE SPACES.
-      * Generic variable for numbers if needed
-       01  NUM                 PIC 9(3)    VALUE ZEROES.
-      * Flag for signaling EoF
+      * Flag for signaling EoF and good/bad data
        01  DATA-REMAINS        PIC X       VALUE 'Y'.
        01  DATA-FLAG           PIC 9       VALUE 0
 
        procedure division.
        PROCESS-COIN-FILES.
+      * Open the files for processing
            OPEN INPUT  COIN-FILE
-                OUTPUT COUNTER-FILE.
+                OUTPUT COUNTER-FILE. 
+      * Perform a priming read of the input file
            READ    COIN-FILE
                AT END MOVE 'N' TO DATA-REMAINS
            END-READ.
-
+      *    Check to see if the input file is empty to begin with
+           IF DATA-REMAINS = 'N'
+               MOVE 'ERROR: Input file is empty. Nothing to process'
+                 TO PRINT-LINE
+               WRITE PRINT-LINE
+           ELSE
+      *        Write the title header to the output file
+               MOVE TITLE-HEADER TO PRINT-LINE
+               WRITE PRINT-LINE
+               MOVE SPACES TO PRINT-LINE
+               WRITE PRINT-LINE
+           END-IF.
+      * Console splash text to let the user know it's working on it
            DISPLAY 'Processing Input File...'.
-           MOVE TITLE-HEADER TO PRINT-LINE.
-           WRITE PRINT-LINE.
-           MOVE SPACES TO PRINT-LINE.
-           WRITE PRINT-LINE.
-
-      * TO-DO: Consider a case for an empty file output shows error
+      * Process record lines of the input file until there are no more
            PERFORM PROCESS-COINS
                UNTIL DATA-REMAINS = 'N'.
            CLOSE   COIN-FILE
                    COUNTER-FILE.
-
+      * Console splash text to show completion of processing
            DISPLAY
              'Processing complete. Please check the output file.'.
            STOP RUN.
@@ -134,12 +144,13 @@
            PERFORM PROCESS-QUARTERS.
 
            PERFORM WRITE-RECORD.
-
+      * Read next record from input file
            READ    COIN-FILE
                AT END MOVE 'N' TO DATA-REMAINS
            END-READ.
 
        PROCESS-PENNIES.
+      *    Test for bad data from input, calculate # rolls if good
            IF PENNIES IS NUMERIC
                DIVIDE PENNIES BY 50 GIVING P-ROLL REMAINDER P-REM
            ELSE
@@ -147,6 +158,8 @@
            END-IF.
 
        PROCESS-NICKELS.
+      *    If data from previous process was good,
+      *    Test for bad data from input, calculate # rolls if good 
            IF DATA-FLAG = 1
                IF NICKELS IS NUMERIC
                    DIVIDE NICKELS BY 40 GIVING N-ROLL REMAINDER N-REM
@@ -156,6 +169,8 @@
            END-IF.
 
        PROCESS-DIMES.
+      *    If data from previous process was good,
+      *    Test for bad data from input, calculate # rolls if good 
            IF DATA-FLAG = 1
                IF DIMES IS NUMERIC
                    DIVIDE DIMES BY 50 GIVING D-ROLL REMAINDER D-REM
@@ -165,6 +180,8 @@
            END-IF.
 
        PROCESS-QUARTERS.
+      *    If data from previous process was good,
+      *    Test for bad data from input, calculate # rolls if good 
            IF DATA-FLAG = 1
                IF QUARTERS IS NUMERIC
                    DIVIDE QUARTERS BY 40 GIVING Q-ROLL REMAINDER Q-REM
@@ -175,8 +192,10 @@
 
        WRITE-RECORD.
            IF DATA-FLAG = 1
+      *        Write the denomination headers to the output
                PERFORM WRITE-HEADERS
                MOVE SPACES TO PRINT-LINE
+      *        Fill output line with initial coin data and write it
                STRING  INIT-LINE-HDR DELIMITED BY SIZE
                        PENNIES DELIMITED BY SIZE
                        AMT-OFFSET DELIMITED BY SIZE
@@ -188,18 +207,22 @@
                        AMT-OFFSET DELIMITED BY SIZE
                INTO PRINT-LINE
                WRITE PRINT-LINE
+      *        Fill output line with coin roll data and write it
                STRING  ROLL-LINE-HDR DELIMITED BY SIZE
                        ROLL-AMOUNTS DELIMITED BY SIZE
                INTO PRINT-LINE
                WRITE PRINT-LINE
+      *        Fill output line with remaining coin data and write it
                STRING  REM-LINE-HDR DELIMITED BY SIZE
                        REM-AMOUNTS DELIMITED BY SIZE
                INTO PRINT-LINE
                WRITE PRINT-LINE
            ELSE
+      *        if any data was bad, default to writing bad record line
                MOVE BAD-RECORD-LINE TO PRINT-LINE
                WRITE PRINT-LINE
            END-IF.
+      *    Add blank line to output file for neatness of records
            MOVE SPACES TO PRINT-LINE.
            WRITE PRINT-LINE.
 
