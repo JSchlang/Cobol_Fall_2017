@@ -26,105 +26,198 @@
 
        WORKING-STORAGE SECTION.
       * VARIABLES FOR THE PROGRAM
+
        01 EMPLOYEEINFO.
-            05 GROSSPAY   PIC 9999V99 VALUE ZEROES.
-            05 FEDTAX     PIC 999V99 VALUE ZEROES.
-            05 NETPAY     PIC 9999V99 VALUE ZEROES.
-            05 TIMENHALF  PIC 999V99 VALUE ZEROES.
-            05 DTIME      PIC 999V99 VALUE ZEROES.
+            05 GROSSPAY          PIC 9999V99 VALUE ZEROES.
+            05 FEDTAX            PIC 999V99 VALUE ZEROES.
+            05 NETPAY            PIC 9999V99 VALUE ZEROES.
+            05 TIMENHALF         PIC 999V99 VALUE ZEROES.
+            05 DTIME             PIC 999V99 VALUE ZEROES.
 
        01 COMPANYTOTALS.
-            05 CGROSSPAY  PIC 99999V99 VALUE ZEROES.
-            05 CFEDTAX    PIC 99999V99 VALUE ZEROES.
-            05 CNETPAY    PIC 99999V99 VALUE ZEROES.
+            05 CGROSSPAY         PIC 99999V99 VALUE ZEROES.
+            05 CFEDTAX           PIC 99999V99 VALUE ZEROES.
+            05 CNETPAY           PIC 99999V99 VALUE ZEROES.
+
+       01 HEADER.
+            05 SOCHEAD       PIC X(8)  VALUE 'SOCSEC #'.
+            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 EMPNAMEHEADER PIC X(8)  VALUE 'EMPLOYEE'.
+            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 WORKEDHEADER  PIC X(6)  VALUE 'HOURS'.
+            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 HOURRATEHEAD  PIC X(8)  VALUE 'PAY RATE'.
+            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 GROSSPAYHEAD  PIC X(9)  VALUE 'GROSS PAY'.
+            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 TAXHEADER     PIC X(12) VALUE 'TAX WITHHELD'.
+            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 NETPAYHEAD    PIC X(7)  VALUE 'NET PAY'.
+
+       01 EMPLOYEE-PRINTLINE.
+           05 PSOC          PIC X(8)  VALUE 'SOCSEC #'.
+           05 FILLER        PIC X(3)  VALUE SPACES.
+           05 PEMPNAME      PIC X(8)  VALUE 'EMPLOYEE'.
+           05 FILLER        PIC X(3)  VALUE SPACES.
+           05 PWORKED       PIC Z9.99.
+           05 FILLER        PIC X(4)  VALUE SPACES.
+           05 PHOURRATE     PIC $ZZZ.99.
+           05 FILLER        PIC X(4)  VALUE SPACES.
+           05 PGROSSPAY     PIC $ZZZZ.99.
+           05 FILLER        PIC X(4)  VALUE SPACES.
+           05 PTAX          PIC $ZZZ.99.
+           05 FILLER        PIC X(8)  VALUE SPACES.
+           05 PNET          PIC $ZZZZ.99.
+
+       01 PRINTALINE PIC X VALUE SPACES.
+
+       01 COMPANYTOTAL-PRINTLINE.
+           05 FOOT-TITLE PIC X(15) VALUE 'COMPANY TOTALS:'.
+           05 FILLER     PIC X(27) VALUE SPACES.
+           05 GROSS-FOOT PIC $ZZZZZ.99.
+           05 FILLER     PIC X(3)  VALUE SPACES.
+           05 TAX-FOOT   PIC $ZZZZZ.99.
+           05 FILLER     PIC X(6)  VALUE SPACES.
+           05 NET-FOOT   PIC $ZZZZZ.99.
       * FLAG FOR MORE DATA IN FILE
        01 DATA-REMAINS      PIC X VALUE 'Y'.
 
        PROCEDURE DIVISION.
        PROCESS-EMPLOYEEFILE.
-           DISPLAY 'HELLO'.
-              DISPLAY 'COMPANY GROSS: ' CGROSSPAY
-              DISPLAY 'COMPANY TAX: ' CFEDTAX
-              DISPLAY 'COMPANY NETPAY: ' CNETPAY
       * OPEN AND PRIME A READ OF INPUT FILE FILEIN
            OPEN INPUT FILEIN.
            READ FILEIN
               AT END MOVE 'N' TO DATA-REMAINS
            END-READ.
-
+      * EMPTY FILE
            IF DATA-REMAINS = 'N'
               DISPLAY 'ERROR: INPUT FILE IS EMPTY'
            ELSE
-              DISPLAY 'WE ARE READING'
+      * FILE HAS CONTENT, CALCULATE UNTIL EOF
+      *        DISPLAY 'WE ARE READING'
+              DISPLAY HEADER
               PERFORM CALCULATE
                  UNTIL DATA-REMAINS = 'N'
            END-IF.
+           DISPLAY PRINTALINE
+           MOVE CGROSSPAY TO GROSS-FOOT
+           MOVE CFEDTAX TO TAX-FOOT
+           MOVE CNETPAY TO NET-FOOT
+           DISPLAY COMPANYTOTAL-PRINTLINE
+      *     DISPLAY '************************'
+      *     DISPLAY 'COMPANY GROSS: ' CGROSSPAY
+      *     DISPLAY 'COMPANY TAX: ' CFEDTAX
+      *     DISPLAY 'COMPANY NETPAY: ' CNETPAY
       *CLOSE INPUT FILE FILEIN
            CLOSE FILEIN.
-
            STOP RUN.
 
        CALCULATE. 
-      *DISPLAYS TO TEST WHAT I AM READING TO BE COMMENTED OUT LATER
+      * DISPLAYS TO TEST WHAT I AM READING TO BE COMMENTED OUT LATER
       *     DISPLAY 'EMPLOYEE: ' EMPLOYEE-IN.
       *     DISPLAY 'SOCIAL: ' SOCSEC.
-           DISPLAY '************************'
-           DISPLAY 'NAME: ' LASTNAME.
-           DISPLAY 'INITIAL: ' INITIALS.
-           DISPLAY 'HOUR RATE: ' HOURRATE.
-           DISPLAY 'HOUR WORKED: ' HOURWORK.
-           PERFORM CALCULATE-GROSSPAY.
-           DISPLAY 'GROSS PAY: ' GROSSPAY.
-           PERFORM CALCULATE-TAX.
-           DISPLAY 'TAX: ' FEDTAX.
-           PERFORM CALCULATE-NETPAY.
-           DISPLAY 'NETPAY: ' NETPAY.
-           DISPLAY '************************'
-              DISPLAY 'COMPANY GROSS: ' CGROSSPAY
-              DISPLAY 'COMPANY TAX: ' CFEDTAX
-              DISPLAY 'COMPANY NETPAY: ' CNETPAY
+      *     DISPLAY '************************'
+      *     DISPLAY 'NAME: ' LASTNAME.
+      *     DISPLAY 'INITIAL: ' INITIALS.
+      *     DISPLAY 'HOUR RATE: ' HOURRATE.
+      *     DISPLAY 'HOUR WORKED: ' HOURWORK.
+      * FUNCTIONS TO CALC INDIVIDUAL GROSSPAY, TAX, NETPAY.
+      * THESE FUNCTIONS ALSO ADD INDIVIDUAL TOTALS TO COMPANY TOTALS.
+      * CALCULATIONS FOR EMPLOYEES WILL BE SKIPPED OVER IF
+      * HOURRATE OR HOURWORK ARE NOT NUMERIC. SINCE THESE ARE THE TWO
+      * VALUES WE RELY ON TO DERIVE ALL OF OUR OTHER INFORMATION,
+      * THESE ARE THE ONLY 2 CONDITIONS IN WHICH I WILL NOT LET DATA IN
+      * IF A CLIENT WISHES TO INPUT A SOCIAL WITH A LETTER OR NAME WITH
+      * NUMBER, SO BE IT. DOESN'T MESS UP THE CALCULATIONS.
+           IF HOURRATE IS NUMERIC AND HOURRATE IS NUMERIC THEN
+              PERFORM CALCULATE-GROSSPAY
+      *        DISPLAY 'GROSS PAY: ' GROSSPAY
+              PERFORM CALCULATE-TAX
+      *        DISPLAY 'TAX: ' FEDTAX
+              PERFORM CALCULATE-NETPAY
+      *        DISPLAY 'NETPAY: ' NETPAY
+
+
+
+              MOVE SOCSEC   TO PSOC
+              MOVE LASTNAME TO PEMPNAME
+              MOVE HOURWORK TO PWORKED
+              MOVE HOURRATE TO PHOURRATE
+              MOVE GROSSPAY TO PGROSSPAY
+              MOVE FEDTAX   TO PTAX
+              MOVE NETPAY   TO PNET
+              DISPLAY PRINTALINE
+              DISPLAY EMPLOYEE-PRINTLINE
+              
+              
+
+
+              ELSE
+                 DISPLAY 'ERROR: INVALID DATA. SKIPPING THIS EMPLOYEE.'
+           END-IF.
+      *     DISPLAY '************************'
+      *     DISPLAY 'COMPANY GROSS: ' CGROSSPAY
+      *     DISPLAY 'COMPANY TAX: ' CFEDTAX
+      *     DISPLAY 'COMPANY NETPAY: ' CNETPAY
+      * READ NEXT EMPLOYEE LINE
            READ FILEIN
               AT END MOVE 'N' TO DATA-REMAINS
            END-READ.
 
+      * GROSSPAY IS CALCULATED HERE
        CALCULATE-GROSSPAY.
+      * IF HOURS WORKED IS LESS THAN 40. STRAIGHT TIME.
            IF HOURWORK <= 40
               MULTIPLY HOURWORK BY HOURRATE GIVING GROSSPAY
            ELSE
+      * IF GREATER THAN 48, DOUBLE TIME MORE THAN 48,
+      * TIME AND A HALF FOR MORE THAN 40 UP TO 48
+      * THEN NORMAL PAY RATE FOR 40 HOURS.
               IF HOURWORK > 48
                  COMPUTE  GROSSPAY= (HOURRATE * 40) + 
                     ((HOURWORK - 48) * (HOURRATE * 2)) 
                     + ( 8 * (HOURRATE * 1.5))
               ELSE
+      * GREATER THAN 40 BUT LESS THAN 48. TIME AND A HALF FOR 
+      * TIME GREATER THAN 40. 40 HOURS OF NORMAL PAY.
                  SUBTRACT 40 FROM HOURWORK GIVING TIMENHALF
                  COMPUTE GROSSPAY= (HOURRATE * 40) + 
                     (TIMENHALF * (HOURRATE * 1.5))
               END-IF
            END-IF.
-           DISPLAY 'TEST'.
+      * ADD INDIVIDUAL GROSSPAY TO COMPANY GROSSPAY
            ADD GROSSPAY TO CGROSSPAY.
-
-       CALCULATE-TAX.
-           DISPLAY 'GROSS PAY IN TAX: ' GROSSPAY
+      
+      *TAX BRACKETS ARE CALCULATED HERE, DIRECTION RANGES ARE A BIT 
+      *CONFUSING, ATTEMPTED TO NORMALIZE THE RANGES.
+       CALCULATE-TAX. 
+      * GROSS PAY MORE THAN 280 PAYS 18% ON (0-200],
+      * 20% (200-240), 22% [240-280), 24% [280, INF]
+           IF GROSSPAY > 280.00
+              COMPUTE FEDTAX= (200 * .18) + ((239.99 - 200.01) * .2)
+                 + ((279.99 - 240.00) * .22) + 
+                 ((GROSSPAY - 279.99) * .24)
+           END-IF.
+      * 18% ON (0-200] , 20% (200-240), 22% [240-280)
+           IF GROSSPAY <= 280.00 AND GROSSPAY > 240.00 
+               COMPUTE FEDTAX= (200 * .18) + ((239.99 - 200.01) * .2)
+                 + ((279.99 - 240.00) * .22)
+           END-IF. 
+      * 18% ON (0-200] , 20% (200-240)         
+           IF GROSSPAY < 240 AND GROSSPAY > 200
+               COMPUTE FEDTAX= (200 * .18) + ((239.99 - 200.01) * .2)
+           END-IF.  
+      * 18% ON (0-200]
            IF GROSSPAY <= 200
-              COMPUTE FEDTAX= (GROSSPAY * .18)
-           END-IF.
-           IF GROSSPAY > 200
-              IF GROSSPAY < 240
-                 COMPUTE FEDTAX= (GROSSPAY * .2)
-              END-IF
-           END-IF.
-           IF GROSSPAY > 240
-              IF GROSSPAY < 280
-                 COMPUTE FEDTAX= (GROSSPAY * .22)
-              ELSE
-                 COMPUTE FEDTAX= (GROSSPAY * .24)
-              END-IF
-           END-IF.
+              COMPUTE FEDTAX= (GROSSPAY * .18)  
+           END-IF
+      * ADD INDIVIDUAL TAX WITHOLDINGS TO THE COMPANY'S TOTAL     
            ADD FEDTAX TO CFEDTAX.
 
        CALCULATE-NETPAY.
+      * NETPAY IS GROSSPAY MINUS FEDTAX
            COMPUTE NETPAY= GROSSPAY - FEDTAX.
+      * ADD INDIVIDUAL NETPAY TO COMPANY NETPAY
            ADD NETPAY TO CNETPAY.
 
 
