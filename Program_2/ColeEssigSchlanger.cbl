@@ -42,8 +42,8 @@
        01 HEADER.
             05 SOCHEAD       PIC X(8)  VALUE 'SOCSEC #'.
             05 FILLER        PIC X(3)  VALUE SPACES.
-            05 EMPNAMEHEADER PIC X(8)  VALUE 'EMPLOYEE'.
-            05 FILLER        PIC X(3)  VALUE SPACES.
+            05 EMPNAMEHEADER PIC X(13)  VALUE 'EMPLOYEE NAME'.
+            05 FILLER        PIC X(9)  VALUE SPACES.
             05 WORKEDHEADER  PIC X(6)  VALUE 'HOURS'.
             05 FILLER        PIC X(3)  VALUE SPACES.
             05 HOURRATEHEAD  PIC X(8)  VALUE 'PAY RATE'.
@@ -59,6 +59,8 @@
            05 FILLER        PIC X(3)  VALUE SPACES.
            05 PEMPNAME      PIC X(8)  VALUE 'EMPLOYEE'.
            05 FILLER        PIC X(3)  VALUE SPACES.
+           05 PINITIAL      PIC X(8)  VALUE 'INITIALS'.
+           05 FILLER        PIC X(3)  VALUE SPACES.
            05 PWORKED       PIC Z9.99.
            05 FILLER        PIC X(4)  VALUE SPACES.
            05 PHOURRATE     PIC $ZZZ.99.
@@ -73,7 +75,7 @@
 
        01 COMPANYTOTAL-PRINTLINE.
            05 FOOT-TITLE PIC X(15) VALUE 'COMPANY TOTALS:'.
-           05 FILLER     PIC X(27) VALUE SPACES.
+           05 FILLER     PIC X(38) VALUE SPACES.
            05 GROSS-FOOT PIC $ZZZZZ.99.
            05 FILLER     PIC X(3)  VALUE SPACES.
            05 TAX-FOOT   PIC $ZZZZZ.99.
@@ -141,6 +143,7 @@
 
               MOVE SOCSEC   TO PSOC
               MOVE LASTNAME TO PEMPNAME
+              MOVE INITIALS TO PINITIAL
               MOVE HOURWORK TO PWORKED
               MOVE HOURRATE TO PHOURRATE
               MOVE GROSSPAY TO PGROSSPAY
